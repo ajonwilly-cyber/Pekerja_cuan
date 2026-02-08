@@ -1,0 +1,173 @@
+<index.html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quizz Cuan - Lomba Cerdas Cermat</title>
+
+<style>
+body{
+    font-family: Arial, sans-serif;
+    background:#e8f5e9;
+    margin:0;
+    padding:0;
+}
+.container{
+    max-width:600px;
+    margin:20px auto;
+    background:#fff;
+    padding:20px;
+    border-radius:12px;
+    box-shadow:0 4px 12px rgba(0,0,0,0.1);
+}
+.logo{text-align:center;}
+.logo img{
+    width:140px;
+    border-radius:50%;
+}
+h1,h2{
+    text-align:center;
+    color:#2e7d32;
+}
+p{text-align:center;}
+input{
+    width:100%;
+    padding:12px;
+    border-radius:8px;
+    border:1px solid #ccc;
+}
+button{
+    background:#2e7d32;
+    color:#fff;
+    border:none;
+    padding:12px;
+    width:100%;
+    border-radius:8px;
+    font-size:16px;
+    cursor:pointer;
+    margin-top:10px;
+}
+button:hover{background:#1b5e20;}
+.option{margin:8px 0;}
+.timer{
+    text-align:right;
+    font-weight:bold;
+    color:#d32f2f;
+}
+.hidden{display:none;}
+.result{text-align:center;}
+.small{font-size:12px;color:#555;}
+</style>
+</head>
+
+<body>
+
+<!-- HALAMAN MULAI -->
+<div class="container" id="start">
+    <div class="logo">
+        <img src="logo.jpg" alt="Logo Quizz">
+    </div>
+    <h1>Lomba Cerdas Cermat</h1>
+    <p>
+        Sekolah Penghasil Pekerja Juan<br>
+        Mapel IPS – Geografi Indonesia<br>
+        Kelas X SMA
+    </p>
+    <input type="text" id="nama" placeholder="Masukkan Nama Peserta">
+    <button onclick="mulai()">Mulai Kuis</button>
+</div>
+
+<!-- HALAMAN KUIS -->
+<div class="container hidden" id="quiz">
+    <div class="timer">Waktu: <span id="time">20</span> detik</div>
+    <h2 id="soal"></h2>
+    <div id="opsi"></div>
+</div>
+
+<!-- HALAMAN HASIL -->
+<div class="container hidden" id="hasil">
+    <div class="logo">
+        <img src="logo.jpg">
+    </div>
+    <div class="result">
+        <h2>Hasil Kuis</h2>
+        <p><b>Nama:</b> <span id="namaHasil"></span></p>
+        <p><b>Skor:</b> <span id="skor"></span> poin</p>
+        <p><b>Konversi Nilai:</b> Rp<span id="rupiah"></span></p>
+        <p class="small">
+            Screenshot hasil ini dan tunjukkan kepada panitia.<br>
+            Nilai rupiah adalah konversi skor untuk lomba.
+        </p>
+    </div>
+</div>
+
+<script>
+const soalData = [
+ {t:"Pulau terbesar di Indonesia adalah …",o:["Sumatra","Sulawesi","Kalimantan","Papua"],j:3},
+ {t:"Ibu kota Jawa Tengah adalah …",o:["Yogyakarta","Semarang","Surakarta","Magelang"],j:1},
+ {t:"Pulau Papua berada di Indonesia bagian …",o:["Barat","Tengah","Selatan","Timur"],j:3},
+ {t:"Ibu kota Sumatra Barat adalah …",o:["Pekanbaru","Jambi","Padang","Bengkulu"],j:2},
+ {t:"Provinsi dengan ibu kota Makassar adalah …",o:["Sulut","Sulteng","Sulsel","Sulbar"],j:2},
+ {t:"Pulau Lombok termasuk Provinsi …",o:["Bali","NTB","NTT","Maluku"],j:1},
+ {t:"Ibu kota Aceh adalah …",o:["Medan","Banda Aceh","Langsa","Lhokseumawe"],j:1},
+ {t:"Pulau Sumatra berada di Indonesia bagian …",o:["Barat","Tengah","Timur","Selatan"],j:0},
+ {t:"Ibu kota Kalimantan Timur adalah …",o:["Pontianak","Samarinda","Balikpapan","Banjarmasin"],j:1},
+ {t:"Provinsi Banten terletak di Pulau …",o:["Sumatra","Kalimantan","Jawa","Sulawesi"],j:2},
+ {t:"Pulau Madura berada di sebelah … Pulau Jawa",o:["Barat","Selatan","Timur","Utara"],j:3},
+ {t:"Ibu kota Maluku adalah …",o:["Ternate","Ambon","Sorong","Manokwari"],j:1},
+ {t:"Pulau Sulawesi berada di Indonesia bagian …",o:["Barat","Tengah","Timur","Selatan"],j:2},
+ {t:"Provinsi Bali terletak di Pulau …",o:["Lombok","Sumatra","Jawa","Kalimantan"],j:2},
+ {t:"Papua Selatan merupakan pemekaran dari Provinsi …",o:["Papua Barat","Papua Tengah","Papua Pegunungan","Papua"],j:3}
+];
+
+let index=0, skor=0, timer, waktu=20;
+soalData.sort(()=>Math.random()-0.5);
+
+function mulai(){
+    const nama=document.getElementById("nama").value;
+    if(!nama){alert("Nama peserta wajib diisi");return;}
+    document.getElementById("start").classList.add("hidden");
+    document.getElementById("quiz").classList.remove("hidden");
+    tampil();
+}
+
+function tampil(){
+    if(index>=soalData.length){selesai();return;}
+    waktu=20;
+    document.getElementById("time").innerText=waktu;
+    document.getElementById("soal").innerText=soalData[index].t;
+    let opsi="";
+    soalData[index].o.forEach((o,i)=>{
+        opsi+=`<div class="option"><button onclick="jawab(${i})">${o}</button></div>`;
+    });
+    document.getElementById("opsi").innerHTML=opsi;
+
+    timer=setInterval(()=>{
+        waktu--;
+        document.getElementById("time").innerText=waktu;
+        if(waktu<=0){
+            clearInterval(timer);
+            index++;
+            tampil();
+        }
+    },1000);
+}
+
+function jawab(p){
+    clearInterval(timer);
+    if(p===soalData[index].j) skor+=10;
+    index++;
+    tampil();
+}
+
+function selesai(){
+    document.getElementById("quiz").classList.add("hidden");
+    document.getElementById("hasil").classList.remove("hidden");
+    document.getElementById("namaHasil").innerText=document.getElementById("nama").value;
+    document.getElementById("skor").innerText=skor;
+    document.getElementById("rupiah").innerText=(skor*1000).toLocaleString("id-ID");
+}
+</script>
+
+</body>
+</html>
